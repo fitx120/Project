@@ -19,6 +19,15 @@ const PITCH_TYPES = [
   { value: '20k_pitched', label: '20K Pitch' }
 ];
 
+// Helper function to format time to 12-hour format
+const formatTo12Hour = (time) => {
+  const [hours, minutes] = time.split(':');
+  const hour = parseInt(hours);
+  const ampm = hour >= 12 ? 'PM' : 'AM';
+  const hour12 = hour % 12 || 12;
+  return `${hour12}:${minutes} ${ampm}`;
+};
+
 const AppointmentForm = ({ onClose, onSubmit, salesPerson, time, isUnavailable }) => {
   const [formData, setFormData] = useState({
     name: '',
@@ -41,9 +50,9 @@ const AppointmentForm = ({ onClose, onSubmit, salesPerson, time, isUnavailable }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg w-96">
+      <div className="bg-white p-6 rounded-lg w-[460px]">
         <h2 className="text-xl font-bold mb-4">
-          Book Appointment
+          Book Appointment - {salesPerson} - {formatTo12Hour(time)}
           {isUnavailable && (
             <span className="text-sm text-red-500 block">
               Note: This slot is normally unavailable
