@@ -1,5 +1,12 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
-import { saveAppointment, deleteAppointment, subscribeToAppointments } from '../firebase';
+import { 
+  saveAppointment, 
+  deleteAppointment, 
+  subscribeToAppointments,
+  saveAttendanceStatus,
+  subscribeToAttendance,
+  loadAttendanceStatus 
+} from '../firebase';
 import { formatTime, createTimeSlots, calculateStats, getStatusDisplay, getStatusColor } from './calendar-utils';
 import AppointmentForm from './forms/AppointmentForm';
 import StatusForm from './forms/StatusForm';
@@ -7,17 +14,16 @@ import AppointmentTooltip from './AppointmentTooltip';
 import SetterSummary from './SetterSummary';
 import SalesPersonSummary from './SalesPersonSummary';
 
-const SalesCalendar = () => {
-  // Initial sales people with attendance status
-  const [salesPeople, setSalesPeople] = useState([
-    { name: "Harsha", startTime: "11:00", endTime: "20:00", isPresent: true },
-    { name: "Mani", startTime: "11:00", endTime: "19:00", isPresent: true },
-    { name: "Monish", startTime: "16:30", endTime: "20:30", isPresent: true },
-    { name: "Pranav", startTime: "09:30", endTime: "14:00", isPresent: true }, // Updated time
-    { name: "Tamil", startTime: "11:00", endTime: "20:00", isPresent: true }
-  ]);
+const DEFAULT_SALES_PEOPLE = [
+  { name: "Harsha", startTime: "11:00", endTime: "20:00", isPresent: true },
+  { name: "Mani", startTime: "11:00", endTime: "19:00", isPresent: true },
+  { name: "Monish", startTime: "16:30", endTime: "20:30", isPresent: true },
+  { name: "Pranav", startTime: "09:30", endTime: "14:00", isPresent: true },
+  { name: "Tamil", startTime: "11:00", endTime: "20:00", isPresent: true }
+];
 
-  // Rest of the state variables remain the same
+const SalesCalendar = () => {
+  const [salesPeople, setSalesPeople] = useState(DEFAULT_SALES_PEOPLE);
   const [appointments, setAppointments] = useState([]);
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [showStatusForm, setShowStatusForm] = useState(false);
@@ -30,7 +36,35 @@ const SalesCalendar = () => {
   // Time slots memoization
   const timeSlots = useMemo(() => createTimeSlots(), []);
 
-  // Firebase subscription
+  // Load initial attendance status for the selected date
+  useEffect(() => {
+    const loadInitialAttendance = async () => {
+      const savedAttendance = await loadAttendanceStatus(selectedDate);
+      if (savedAttendance) {
+        setSalesPeople(savedAttendance);
+      } else {
+        setSalesPeople(DEFAULT_SALES_PEOPLE);
+      }
+    };
+    loadInitialAttendance();
+  }, [selectedDate]);
+
+  // Subscribe to attendance changes for the selected date
+  useEffect(() => {
+    const unsubscribe = subscribeToAttendance((updatedSalesPeople) => {
+      if (updatedSalesPeople) {
+        setSalesPeople(updatedSalesPeople);
+      } else {
+        setSalesPeople(DEFAULT_SALES_PEOPLE);
+      }
+    }, selectedDate);
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [selectedDate]);
+
+  // Firebase appointments subscription
   useEffect(() => {
     const unsubscribe = subscribeToAppointments((updatedAppointments) => {
       setAppointments(updatedAppointments);
@@ -41,7 +75,10 @@ const SalesCalendar = () => {
     };
   }, []);
 
-  // Event handlers remain the same
+  const handleDateChange = (date) => {
+    setSelectedDate(date);
+  };
+
   const handleBookAppointment = useCallback(async (formData) => {
     const newAppointment = {
       id: Date.now(),
@@ -87,10 +124,46 @@ const SalesCalendar = () => {
     }
   }, [selectedDate]);
 
-  const toggleAttendance = (index) => {
-    setSalesPeople(prev => prev.map((person, i) => 
-      i === index ? { ...person, isPresent: !person.isPresent } : person
-    ));
+  const toggleAttendance = async (index) => {
+    const person = salesPeople[index];
+    
+    if (person.isPresent) {
+      // If marking absent
+      const input = window.prompt(
+        `Type 'absent' to mark ${person.name} as absent:`
+      );
+      
+      if (input && input.toLowerCase().trim() === 'absent') {
+        const updatedPeople = salesPeople.map((p, i) => 
+          i === index ? { ...p, isPresent: false } : p
+        );
+        setSalesPeople(updatedPeople);
+        try {
+          await saveAttendanceStatus(updatedPeople, selectedDate);
+        } catch (error) {
+          console.error('Error saving attendance:', error);
+          setSalesPeople(salesPeople);
+          alert('Error saving attendance status. Please try again.');
+        }
+      }
+    } else {
+      // If marking present
+      const shouldUpdate = window.confirm(`Mark ${person.name} as present?`);
+      
+      if (shouldUpdate) {
+        const updatedPeople = salesPeople.map((p, i) => 
+          i === index ? { ...p, isPresent: true } : p
+        );
+        setSalesPeople(updatedPeople);
+        try {
+          await saveAttendanceStatus(updatedPeople, selectedDate);
+        } catch (error) {
+          console.error('Error saving attendance:', error);
+          setSalesPeople(salesPeople);
+          alert('Error saving attendance status. Please try again.');
+        }
+      }
+    }
   };
 
   const handleSlotClick = (person, time, isUnavailable) => {
@@ -125,7 +198,7 @@ const SalesCalendar = () => {
           type="date"
           className="border p-2 rounded"
           value={selectedDate.toISOString().split('T')[0]}
-          onChange={e => setSelectedDate(new Date(e.target.value))}
+          onChange={e => handleDateChange(new Date(e.target.value))}
         />
       </div>
 
@@ -136,14 +209,19 @@ const SalesCalendar = () => {
             <tr>
               <th className="border p-2 bg-gray-50">Time</th>
               {salesPeople.map((person, index) => (
-                <th key={person.name} className="border p-2 bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <span>{person.name}</span>
-                    <input
-                      type="checkbox"
-                      checked={person.isPresent}
-                      onChange={() => toggleAttendance(index)}
-                      className="ml-2"
+                <th key={person.name} className="border p-2 bg-gray-50 min-w-[150px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`flex-grow ${!person.isPresent ? 'text-red-500 line-through' : ''}`}>
+                      {person.name}
+                    </span>
+                    <button
+                      onClick={() => toggleAttendance(index)}
+                      className={`w-4 h-4 ${
+                        person.isPresent 
+                          ? 'bg-green-500' 
+                          : 'bg-red-500'
+                      }`}
+                      title={person.isPresent ? "Mark as Absent" : "Mark as Present"}
                     />
                   </div>
                   <div className="text-xs text-gray-500">

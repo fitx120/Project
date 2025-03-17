@@ -97,4 +97,59 @@ export const subscribeToAppointments = (callback) => {
   }
 };
 
+// New attendance functions with date-specific tracking
+export const saveAttendanceStatus = async (salesPeople, date) => {
+  try {
+    console.log(`[${import.meta.env.MODE}] Saving attendance status for date:`, date);
+    const dateKey = date.toISOString().split('T')[0];
+    const attendanceRef = ref(database, `attendance/${dateKey}`);
+    await set(attendanceRef, {
+      salesPeople,
+      lastUpdated: new Date().toISOString()
+    });
+    console.log(`[${import.meta.env.MODE}] Attendance status saved successfully`);
+    return true;
+  } catch (error) {
+    console.error(`[${import.meta.env.MODE}] Error saving attendance status:`, error);
+    throw error;
+  }
+};
+
+export const subscribeToAttendance = (callback, date) => {
+  try {
+    console.log(`[${import.meta.env.MODE}] Setting up attendance subscription for date:`, date);
+    const dateKey = date.toISOString().split('T')[0];
+    const attendanceRef = ref(database, `attendance/${dateKey}`);
+    return onValue(attendanceRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        console.log(`[${import.meta.env.MODE}] Attendance status updated`);
+        callback(data.salesPeople);
+      }
+    });
+  } catch (error) {
+    console.error(`[${import.meta.env.MODE}] Error in attendance subscription:`, error);
+    return () => {};
+  }
+};
+
+export const loadAttendanceStatus = async (date) => {
+  try {
+    console.log(`[${import.meta.env.MODE}] Loading attendance status for date:`, date);
+    const dateKey = date.toISOString().split('T')[0];
+    const attendanceRef = ref(database, `attendance/${dateKey}`);
+    const snapshot = await get(attendanceRef);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      console.log(`[${import.meta.env.MODE}] Attendance status loaded`);
+      return data.salesPeople;
+    }
+    console.log(`[${import.meta.env.MODE}] No attendance status found`);
+    return null;
+  } catch (error) {
+    console.error(`[${import.meta.env.MODE}] Error loading attendance status:`, error);
+    return null;
+  }
+};
+
 export default database;
