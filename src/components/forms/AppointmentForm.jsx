@@ -34,7 +34,8 @@ const AppointmentForm = ({ onClose, onSubmit, salesPerson, time, isUnavailable }
     phone: '',
     notes: '',
     setterName: '',
-    pitchType: ''
+    pitchType: '',
+    initialPayment: 'unpaid' // default value
   });
 
   const handleSubmit = (e) => {
@@ -125,6 +126,34 @@ const AppointmentForm = ({ onClose, onSubmit, salesPerson, time, isUnavailable }
                   <option key={pitch.value} value={pitch.value}>{pitch.label}</option>
                 ))}
               </select>
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-2">Rs. 1.50 Paid? *</label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="initialPayment"
+                    value="paid"
+                    checked={formData.initialPayment === 'paid'}
+                    onChange={e => setFormData(prev => ({ ...prev, initialPayment: e.target.value }))}
+                    className="mr-2"
+                  />
+                  Yes
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="initialPayment"
+                    value="unpaid"
+                    checked={formData.initialPayment === 'unpaid'}
+                    onChange={e => setFormData(prev => ({ ...prev, initialPayment: e.target.value }))}
+                    className="mr-2"
+                  />
+                  No
+                </label>
+              </div>
             </div>
           </div>
 

@@ -106,7 +106,9 @@ export const calculateSetterStats = (appointments, setter) => {
       app.initialPitchType === '20k_pitched'
     ).length,
     didntPick: setterAppointments.filter(app => app.status === 'didnt_pick').length,
-    wronglyQualified: setterAppointments.filter(app => app.status === 'wrongly_qualified').length
+    wronglyQualified: setterAppointments.filter(app => app.status === 'wrongly_qualified').length,
+    initialPaymentPaid: setterAppointments.filter(app => app.initialPayment === 'paid').length,
+    initialPaymentNotPaid: setterAppointments.filter(app => app.initialPayment === 'unpaid').length
   };
 };
 
@@ -141,7 +143,9 @@ export const calculateSalesPersonStats = (appointments, salesPerson, selectedDat
     booked20k,
     totalPitch5k,
     totalPitch20k,
-    payments
+    payments,
+    initialPaymentPaid: personAppointments.filter(app => app.initialPayment === 'paid').length,
+    initialPaymentNotPaid: personAppointments.filter(app => app.initialPayment === 'unpaid').length
   };
 };
 
@@ -201,9 +205,15 @@ export const calculateStats = (appointments, salesPeople, selectedDate) => {
     (app.status === 'paid' && app.pitchedType === '20k_pitched')
   ).length;
 
+  // Add initial payment statistics
+  const initialPaymentPaid = todayAppointments.filter(app => app.initialPayment === 'paid').length;
+  const initialPaymentNotPaid = todayAppointments.filter(app => app.initialPayment === 'unpaid').length;
+
   return {
     available: totalSlots - todayAppointments.length,
     booked: todayAppointments.length,
+    initialPaymentPaid,
+    initialPaymentNotPaid,
     picked: todayAppointments.filter(app => app.status === 'picked').length,
     didntPick: todayAppointments.filter(app => app.status === 'didnt_pick').length,
     callLater: todayAppointments.filter(app => app.status === 'call_later').length,
