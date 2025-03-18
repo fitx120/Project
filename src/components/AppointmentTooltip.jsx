@@ -35,6 +35,16 @@ const AppointmentTooltip = ({ appointment, position }) => (
         <span className="font-medium">Initial Pitch:</span>{' '}
         {getStatusDisplay(appointment.initialPitchType)}
       </p>
+      <p className="text-sm">
+        <span className="font-medium">Rs. 1.50:</span>{' '}
+        <span className={appointment.initialPayment === 'paid' ? 'text-green-600' : 'text-red-600'}>
+          {appointment.initialPayment === 'paid' ? 'Paid' : 'Not Paid'}
+        </span>
+      </p>
+      <p className="text-sm">
+        <span className="font-medium">Lead Source:</span>{' '}
+        <span className="capitalize">{appointment.leadSource || 'Ads'}</span>
+      </p>
     </div>
 
     {/* Sales Information */}
@@ -98,6 +108,8 @@ AppointmentTooltip.propTypes = {
     salesPerson: PropTypes.string.isRequired,
     setterName: PropTypes.string.isRequired,
     initialPitchType: PropTypes.string.isRequired,
+    initialPayment: PropTypes.string.isRequired,
+    leadSource: PropTypes.string,
     callLaterDateTime: PropTypes.string,
     callNotes: PropTypes.string,
     paymentType: PropTypes.string,

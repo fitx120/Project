@@ -35,7 +35,8 @@ const AppointmentForm = ({ onClose, onSubmit, salesPerson, time, isUnavailable }
     notes: '',
     setterName: '',
     pitchType: '',
-    initialPayment: 'unpaid' // default value
+    initialPayment: 'unpaid', // default value
+    leadSource: 'ads' // default value
   });
 
   const handleSubmit = (e) => {
@@ -152,6 +153,34 @@ const AppointmentForm = ({ onClose, onSubmit, salesPerson, time, isUnavailable }
                     className="mr-2"
                   />
                   No
+                </label>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block mb-2">Lead Source *</label>
+              <div className="flex gap-4">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="leadSource"
+                    value="ads"
+                    checked={formData.leadSource === 'ads'}
+                    onChange={e => setFormData(prev => ({ ...prev, leadSource: e.target.value }))}
+                    className="mr-2"
+                  />
+                  Ads
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    name="leadSource"
+                    value="youtube"
+                    checked={formData.leadSource === 'youtube'}
+                    onChange={e => setFormData(prev => ({ ...prev, leadSource: e.target.value }))}
+                    className="mr-2"
+                  />
+                  YouTube
                 </label>
               </div>
             </div>

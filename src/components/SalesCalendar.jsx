@@ -329,17 +329,21 @@ const SalesCalendar = () => {
             <div className="text-lg">1.50 Not Paid</div>
             <div className="text-2xl font-bold">{stats.initialPaymentNotPaid}</div>
           </div>
+          <div className="bg-amber-100 p-3 rounded">
+            <div className="text-lg">Rescheduled</div>
+            <div className="text-2xl font-bold">{stats.rescheduled}</div>
+          </div>
           <div className="bg-purple-100 p-3 rounded">
             <div className="text-lg">Picked</div>
             <div className="text-2xl font-bold">{stats.picked}</div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-6 gap-4 mt-4">
           <div className="bg-red-100 p-3 rounded">
             <div className="text-lg">Didn't Pick</div>
             <div className="text-2xl font-bold">{stats.didntPick}</div>
           </div>
-        </div>
-
-        <div className="grid grid-cols-6 gap-4 mt-4">
           <div className="bg-blue-100 p-3 rounded">
             <div className="text-lg">Call Later</div>
             <div className="text-2xl font-bold">{stats.callLater}</div>
@@ -360,9 +364,20 @@ const SalesCalendar = () => {
             <div className="text-lg">20K Pitched</div>
             <div className="text-2xl font-bold">{stats.pitched20k}</div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-6 gap-4 mt-4">
           <div className="bg-green-100 p-3 rounded">
             <div className="text-lg">Paid</div>
             <div className="text-2xl font-bold">{stats.paid}</div>
+          </div>
+          <div className="bg-red-100 p-3 rounded">
+            <div className="text-lg">Wrongly Qual.</div>
+            <div className="text-2xl font-bold">{stats.wronglyQualified}</div>
+          </div>
+          <div className="bg-gray-100 p-3 rounded">
+            <div className="text-lg">Wrong Number</div>
+            <div className="text-2xl font-bold">{stats.wrongNumber}</div>
           </div>
         </div>
 
