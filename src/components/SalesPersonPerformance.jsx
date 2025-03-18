@@ -14,8 +14,8 @@ const SalesPersonPerformance = ({ appointments = [], salesPeople = [] }) => {
       paid: personAppointments.filter(app => app.status === 'paid').length,
       revenue: personAppointments.reduce((total, app) => {
         const paymentValues = {
-          '5k': 5000,
-          '4k': 4000,
+          '5k': 10000,  // Updated from 5000
+          '4k': 9000,   // Updated from 4000
           '1k_deposit': 1000,
           '5k_deposit': 5000,
           '6k_sub': 6000,
@@ -38,8 +38,8 @@ const SalesPersonPerformance = ({ appointments = [], salesPeople = [] }) => {
               <th className="px-4 py-2 text-left">Sales Person</th>
               <th className="px-4 py-2 text-center">Total</th>
               <th className="px-4 py-2 text-center">Picked</th>
-              <th className="px-4 py-2 text-center">Didn't Pick</th>
-              <th className="px-4 py-2 text-center">5K Pitched</th>
+              <th className="px-4 py-2 text-center">Didn't Show up</th>
+              <th className="px-4 py-2 text-center">10K Pitched</th>
               <th className="px-4 py-2 text-center">20K Pitched</th>
               <th className="px-4 py-2 text-center">Paid</th>
               <th className="px-4 py-2 text-right">Revenue</th>
@@ -87,8 +87,8 @@ const SalesPersonPerformance = ({ appointments = [], salesPeople = [] }) => {
               <td className="px-4 py-2 text-right">
                 ₹{appointments.reduce((total, app) => {
                   const paymentValues = {
-                    '5k': 5000,
-                    '4k': 4000,
+                    '5k': 10000,  // Updated from 5000
+                    '4k': 9000,   // Updated from 4000
                     '1k_deposit': 1000,
                     '5k_deposit': 5000,
                     '6k_sub': 6000,

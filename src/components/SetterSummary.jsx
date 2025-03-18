@@ -26,17 +26,17 @@ const SetterSummary = ({ setterStats }) => {
               <th className="px-2 py-2 text-left border">Setter</th>
               <th className="px-2 py-2 text-center border">Total Set</th>
               <th className="px-2 py-2 text-center border bg-amber-50">Rescheduled</th>
-              <th className="px-2 py-2 text-center border">5K Set</th>
+              <th className="px-2 py-2 text-center border">10K Set</th>
               <th className="px-2 py-2 text-center border">20K Set</th>
               <th className="px-2 py-2 text-center border">Total Pitched</th>
-              <th className="px-2 py-2 text-center border">5K Pitched</th>
+              <th className="px-2 py-2 text-center border">10K Pitched</th>
               <th className="px-2 py-2 text-center border">20K Pitched</th>
               <th className="px-2 py-2 text-center border">Converted</th>
-              <th className="px-2 py-2 text-center border">5K Conv.</th>
+              <th className="px-2 py-2 text-center border">10K Conv.</th>
               <th className="px-2 py-2 text-center border">20K Conv.</th>
               <th className="px-2 py-2 text-center border">Didn't Show up</th>
               <th className="px-2 py-2 text-center border">Wrong Qual.</th>
-              <th className="px-2 py-2 text-center border">5K Rate</th>
+              <th className="px-2 py-2 text-center border">10K Rate</th>
               <th className="px-2 py-2 text-center border">20K Rate</th>
             </tr>
           </thead>

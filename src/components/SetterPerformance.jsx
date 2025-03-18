@@ -65,8 +65,8 @@ const SetterPerformance = ({ appointments = [] }) => {
             <tr className="bg-gray-50">
               <th className="px-4 py-2 text-left">Setter</th>
               <th className="px-4 py-2 text-center">Total</th>
-              <th className="px-4 py-2 text-center">5K Pitched</th>
-              <th className="px-4 py-2 text-center">5K Rate</th>
+              <th className="px-4 py-2 text-center">10K Pitched</th>
+              <th className="px-4 py-2 text-center">10K Rate</th>
               <th className="px-4 py-2 text-center">20K Pitched</th>
               <th className="px-4 py-2 text-center">20K Rate</th>
               <th className="px-4 py-2 text-center">Wrong #</th>

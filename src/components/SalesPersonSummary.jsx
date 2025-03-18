@@ -11,12 +11,12 @@ const SalesPersonSummary = ({ salesPersonStats }) => {
           <thead>
             <tr className="bg-gray-100">
               <th className="px-2 py-2 text-left border">Sales Person</th>
-              <th className="px-2 py-2 text-center border">5K Booked</th>
-              <th className="px-2 py-2 text-center border">5K Pitched</th>
-              <th className="px-2 py-2 text-center border">5K Paid</th>
-              <th className="px-2 py-2 text-center border">4K Paid</th>
+              <th className="px-2 py-2 text-center border">10K Booked</th>
+              <th className="px-2 py-2 text-center border">10K Pitched</th>
+              <th className="px-2 py-2 text-center border">10K Paid</th>
+              <th className="px-2 py-2 text-center border">9K Paid</th>
               <th className="px-2 py-2 text-center border">1K Deposit</th>
-              <th className="px-2 py-2 text-center border">5K ARP</th>
+              <th className="px-2 py-2 text-center border">10K ARP</th>
               <th className="px-2 py-2 text-center border">20K Booked</th>
               <th className="px-2 py-2 text-center border">20K Pitched</th>
               <th className="px-2 py-2 text-center border">20K Paid</th>
@@ -30,16 +30,16 @@ const SalesPersonSummary = ({ salesPersonStats }) => {
           </thead>
           <tbody>
             {Object.entries(salesPersonStats).map(([person, stats]) => {
-              const fiveKRevenue = (stats.payments?.['5k'] || 0) * 5000 + 
-                                 (stats.payments?.['4k'] || 0) * 4000;
+              const tenKRevenue = (stats.payments?.['5k'] || 0) * 10000 + 
+                                (stats.payments?.['4k'] || 0) * 9000;
               
               const twentyKRevenue = (stats.payments?.['20k'] || 0) * 20000 + 
                                    (stats.payments?.['15k'] || 0) * 15000 + 
                                    (stats.payments?.['10k'] || 0) * 10000 + 
                                    (stats.payments?.['6k_sub'] || 0) * 6000;
 
-              const fiveKARP = stats.totalPitch5k > 0
-                ? (fiveKRevenue / stats.totalPitch5k).toFixed(0)
+              const tenKARP = stats.totalPitch5k > 0
+                ? (tenKRevenue / stats.totalPitch5k).toFixed(0)
                 : '0';
 
               const twentyKARP = stats.totalPitch20k > 0
@@ -54,7 +54,7 @@ const SalesPersonSummary = ({ salesPersonStats }) => {
                   <td className="px-2 py-2 text-center border bg-green-100">{stats.payments['5k'] || 0}</td>
                   <td className="px-2 py-2 text-center border bg-green-100">{stats.payments['4k'] || 0}</td>
                   <td className="px-2 py-2 text-center border bg-green-100">{stats.payments['1k_deposit'] || 0}</td>
-                  <td className="px-2 py-2 text-center border bg-blue-50">₹{fiveKARP}</td>
+                  <td className="px-2 py-2 text-center border bg-blue-50">₹{tenKARP}</td>
                   <td className="px-2 py-2 text-center border bg-teal-50">{stats.booked20k}</td>
                   <td className="px-2 py-2 text-center border bg-teal-100">{stats.totalPitch20k}</td>
                   <td className="px-2 py-2 text-center border bg-green-100">{stats.payments['20k'] || 0}</td>

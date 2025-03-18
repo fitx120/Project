@@ -19,7 +19,7 @@ export const getStatusDisplay = (status) => {
     'call_later': 'Call Later',
     'will_join_later': 'Will Join Later',
     'ghosted': 'Ghosted',
-    '5k_pitched': '5K Pitched',
+    '5k_pitched': '10K Pitched',  // Display updated, keeping code same for DB compatibility
     '20k_pitched': '20K Pitched',
     'booked': 'Booked',
     'rescheduled': 'Rescheduled',
@@ -172,8 +172,8 @@ export const calculateStats = (appointments, salesPeople, selectedDate) => {
   }, 0);
 
   const paymentValues = {
-    '5k': 5000,
-    '4k': 4000,
+    '5k': 10000,  // Updated from 5000
+    '4k': 9000,   // Updated from 4000
     '1k_deposit': 1000,
     '5k_deposit': 5000,
     '6k_sub': 6000,

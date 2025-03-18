@@ -115,7 +115,7 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
                 }}
               >
                 <option value="booked">Booked</option>
-                <option value="5k_pitched">5K Pitched</option>
+                <option value="5k_pitched">10K Pitched</option>
                 <option value="20k_pitched">20K Pitched</option>
                 <option value="picked">Picked</option>
                 <option value="didnt_pick">Didn't Show up</option>
@@ -171,7 +171,7 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
                     onChange={e => setPitchedType(e.target.value)}
                     required
                   >
-                    <option value="5k_pitched">5K Pitched</option>
+                    <option value="5k_pitched">10K Pitched</option>
                     <option value="20k_pitched">20K Pitched</option>
                   </select>
                 </div>
@@ -184,8 +184,8 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
                     required
                   >
                     <option value="">Select Payment Type</option>
-                    <option value="5k">5K</option>
-                    <option value="4k">4K</option>
+                    <option value="5k">10K</option>
+                    <option value="4k">9K</option>
                     <option value="1k_deposit">1000 Deposit</option>
                     <option value="20k">20K</option>
                     <option value="10k">10K</option>

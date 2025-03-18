@@ -33,7 +33,6 @@ const SalesCalendar = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [unavailableSlots, setUnavailableSlots] = useState({});
 
-  // Time slots memoization
   const timeSlots = useMemo(() => createTimeSlots(), []);
 
   // Load initial attendance status for the selected date
@@ -128,7 +127,6 @@ const SalesCalendar = () => {
     const person = salesPeople[index];
     
     if (person.isPresent) {
-      // If marking absent
       const input = window.prompt(
         `Type 'absent' to mark ${person.name} as absent:`
       );
@@ -147,7 +145,6 @@ const SalesCalendar = () => {
         }
       }
     } else {
-      // If marking present
       const shouldUpdate = window.confirm(`Mark ${person.name} as present?`);
       
       if (shouldUpdate) {
@@ -186,7 +183,6 @@ const SalesCalendar = () => {
     }));
   };
 
-  // Calculate statistics
   const stats = useMemo(() => calculateStats(appointments, salesPeople, selectedDate), 
     [appointments, salesPeople, selectedDate]);
 
@@ -357,7 +353,7 @@ const SalesCalendar = () => {
             <div className="text-2xl font-bold">{stats.ghosted}</div>
           </div>
           <div className="bg-cyan-100 p-3 rounded">
-            <div className="text-lg">5K Pitched</div>
+            <div className="text-lg">10K Pitched</div>
             <div className="text-2xl font-bold">{stats.pitched5k}</div>
           </div>
           <div className="bg-teal-100 p-3 rounded">
@@ -386,11 +382,11 @@ const SalesCalendar = () => {
           <h3 className="font-bold mb-2">Payment Summary</h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-green-50 p-3 rounded">
-              <div className="text-lg">5K</div>
+              <div className="text-lg">10K</div>
               <div className="text-xl font-bold">{stats.payments['5k'] || 0}</div>
             </div>
             <div className="bg-green-50 p-3 rounded">
-              <div className="text-lg">4K</div>
+              <div className="text-lg">9K</div>
               <div className="text-xl font-bold">{stats.payments['4k'] || 0}</div>
             </div>
             <div className="bg-green-50 p-3 rounded">

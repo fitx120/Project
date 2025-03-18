@@ -48,7 +48,7 @@ const SalesSummary = ({
           bgColor="bg-purple-100"
         />
         <SummaryBox
-          label="Didn't Pick"
+          label="Didn't Show up"
           count={didntPick}
           bgColor="bg-red-100"
         />
@@ -63,7 +63,7 @@ const SalesSummary = ({
           bgColor="bg-green-200"
         />
         <SummaryBox
-          label="5K Pitched"
+          label="10K Pitched"
           count={pitched5k}
           bgColor="bg-cyan-100"
         />

@@ -15,7 +15,7 @@ const SETTERS = [
 ];
 
 const PITCH_TYPES = [
-  { value: '5k_pitched', label: '5K Pitch' },
+  { value: '5k_pitched', label: '10K Pitch' },  // Updated display label, keeping value same for DB compatibility
   { value: '20k_pitched', label: '20K Pitch' }
 ];
 
