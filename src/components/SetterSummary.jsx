@@ -25,6 +25,7 @@ const SetterSummary = ({ setterStats }) => {
             <tr className="bg-gray-100">
               <th className="px-2 py-2 text-left border">Setter</th>
               <th className="px-2 py-2 text-center border">Total Set</th>
+              <th className="px-2 py-2 text-center border bg-amber-50">Rescheduled</th>
               <th className="px-2 py-2 text-center border">5K Set</th>
               <th className="px-2 py-2 text-center border">20K Set</th>
               <th className="px-2 py-2 text-center border">Total Pitched</th>
@@ -43,11 +44,14 @@ const SetterSummary = ({ setterStats }) => {
             {SETTERS.map(setter => {
               const stats = setterStats[setter] || {
                 total: 0,
+                rescheduled: 0,
                 pitch5k: 0,
                 pitch20k: 0,
                 initialPitch5k: 0,
                 initialPitch20k: 0,
                 converted: 0,
+                converted5k: 0,
+                converted20k: 0,
                 didntPick: 0,
                 wronglyQualified: 0
               };
@@ -67,6 +71,7 @@ const SetterSummary = ({ setterStats }) => {
                 <tr key={setter} className="hover:bg-gray-50">
                   <td className="px-2 py-2 border font-medium">{setter}</td>
                   <td className="px-2 py-2 text-center border">{stats.total}</td>
+                  <td className="px-2 py-2 text-center border bg-amber-50">{stats.rescheduled}</td>
                   <td className="px-2 py-2 text-center border bg-cyan-50">{stats.initialPitch5k}</td>
                   <td className="px-2 py-2 text-center border bg-teal-50">{stats.initialPitch20k}</td>
                   <td className="px-2 py-2 text-center border bg-gray-50">{totalPitched}</td>
@@ -88,6 +93,9 @@ const SetterSummary = ({ setterStats }) => {
               <td className="px-2 py-2 border font-bold">Total</td>
               <td className="px-2 py-2 text-center border font-bold">
                 {SETTERS.reduce((acc, setter) => acc + (setterStats[setter]?.total || 0), 0)}
+              </td>
+              <td className="px-2 py-2 text-center border font-bold bg-amber-50">
+                {SETTERS.reduce((acc, setter) => acc + (setterStats[setter]?.rescheduled || 0), 0)}
               </td>
               <td className="px-2 py-2 text-center border font-bold">
                 {SETTERS.reduce((acc, setter) => acc + (setterStats[setter]?.initialPitch5k || 0), 0)}
@@ -138,6 +146,7 @@ const SetterSummary = ({ setterStats }) => {
 SetterSummary.propTypes = {
   setterStats: PropTypes.objectOf(PropTypes.shape({
     total: PropTypes.number.isRequired,
+    rescheduled: PropTypes.number.isRequired,
     pitch5k: PropTypes.number.isRequired,
     pitch20k: PropTypes.number.isRequired,
     initialPitch5k: PropTypes.number.isRequired,
