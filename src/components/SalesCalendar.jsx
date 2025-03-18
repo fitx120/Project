@@ -13,6 +13,7 @@ import StatusForm from './forms/StatusForm';
 import AppointmentTooltip from './AppointmentTooltip';
 import SetterSummary from './SetterSummary';
 import SalesPersonSummary from './SalesPersonSummary';
+import LeadSourcePerformance from './LeadSourcePerformance';
 
 const DEFAULT_SALES_PEOPLE = [
   { name: "Harsha", startTime: "11:00", endTime: "20:00", isPresent: true },
@@ -429,6 +430,11 @@ const SalesCalendar = () => {
       {/* Setter Summary */}
       <div className="bg-gray-50 p-4 rounded-lg mt-6">
         <SetterSummary setterStats={stats.setterStats} />
+      </div>
+
+      {/* Lead Source Performance */}
+      <div className="bg-gray-50 p-4 rounded-lg mt-6">
+        <LeadSourcePerformance leadSourceStats={stats.leadSourceStats} />
       </div>
 
       {/* Forms */}

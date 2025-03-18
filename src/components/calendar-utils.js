@@ -74,6 +74,136 @@ export const countSlotsBetweenTimes = (startTime, endTime) => {
   return Math.floor(totalMinutes / 30);
 };
 
+const showUpStatuses = [
+  'picked',
+  '5k_pitched',
+  '20k_pitched',
+  'will_join_later',
+  'ghosted',
+  'wrongly_qualified',
+  'paid'
+];
+
+const noShowStatuses = [
+  'didnt_pick',
+  'call_later',
+  'rescheduled',
+  'wrong_number'
+];
+
+export const calculateLeadSourceStats = (appointments) => {
+  // Get a map of all appointments that have been rescheduled to a new time
+  const rescheduledMap = appointments.reduce((acc, app) => {
+    if (app.parentId) {
+      acc[app.parentId] = true;
+    }
+    return acc;
+  }, {});
+
+  // Only count appointments that haven't been rescheduled to another time
+  const scheduledApps = appointments.filter(app => 
+    app.status !== 'rescheduled' && !rescheduledMap[app.id]
+  );
+  
+  // 10K stats
+  const scheduled10k = scheduledApps.filter(app => app.initialPitchType === '5k_pitched').length;
+
+  const showUp10k = appointments.filter(app => 
+    app.initialPitchType === '5k_pitched' && 
+    showUpStatuses.includes(app.status)
+  ).length;
+
+  const didntShow10k = appointments.filter(app => 
+    app.initialPitchType === '5k_pitched' && 
+    noShowStatuses.includes(app.status)
+  ).length;
+
+  const pitched10k = appointments.filter(app => 
+    app.status === '5k_pitched' || 
+    (app.status === 'paid' && app.pitchedType === '5k_pitched')
+  ).length;
+
+  const paid10k = appointments.filter(app => 
+    app.status === 'paid' && 
+    app.pitchedType === '5k_pitched' &&
+    ['5k', '4k', '1k_deposit'].includes(app.paymentType)
+  ).length;
+
+  const revenue10k = appointments.reduce((total, app) => {
+    if (app.status === 'paid' && app.pitchedType === '5k_pitched') {
+      const values = {
+        '5k': 10000,
+        '4k': 9000,
+        '1k_deposit': 1000
+      };
+      return total + (values[app.paymentType] || 0);
+    }
+    return total;
+  }, 0);
+
+  // 20K stats
+  const scheduled20k = scheduledApps.filter(app => app.initialPitchType === '20k_pitched').length;
+  
+  const showUp20k = appointments.filter(app => 
+    app.initialPitchType === '20k_pitched' && 
+    showUpStatuses.includes(app.status)
+  ).length;
+
+  const didntShow20k = appointments.filter(app => 
+    app.initialPitchType === '20k_pitched' && 
+    noShowStatuses.includes(app.status)
+  ).length;
+
+  const pitched20k = appointments.filter(app => 
+    app.status === '20k_pitched' || 
+    (app.status === 'paid' && app.pitchedType === '20k_pitched')
+  ).length;
+
+  const paid20k = appointments.filter(app => 
+    app.status === 'paid' && 
+    app.pitchedType === '20k_pitched' &&
+    ['20k', '15k', '10k', '10k_2nd', '6k_sub', '5k_deposit'].includes(app.paymentType)
+  ).length;
+
+  const revenue20k = appointments.reduce((total, app) => {
+    if (app.status === 'paid' && app.pitchedType === '20k_pitched') {
+      const values = {
+        '20k': 20000,
+        '15k': 15000,
+        '10k': 10000,
+        '10k_2nd': 10000,
+        '6k_sub': 6000,
+        '5k_deposit': 5000
+      };
+      return total + (values[app.paymentType] || 0);
+    }
+    return total;
+  }, 0);
+
+  return {
+    stats10k: {
+      scheduled: scheduled10k,
+      showUp: showUp10k,
+      didntShowUp: didntShow10k,
+      showUpRate: scheduled10k > 0 ? ((showUp10k / scheduled10k) * 100).toFixed(1) : '0.0',
+      pitched: pitched10k,
+      paid: paid10k,
+      closingRate: pitched10k > 0 ? ((paid10k / pitched10k) * 100).toFixed(1) : '0.0',
+      revenue: revenue10k
+    },
+    stats20k: {
+      scheduled: scheduled20k,
+      showUp: showUp20k,
+      didntShowUp: didntShow20k,
+      showUpRate: scheduled20k > 0 ? ((showUp20k / scheduled20k) * 100).toFixed(1) : '0.0',
+      pitched: pitched20k,
+      paid: paid20k,
+      closingRate: pitched20k > 0 ? ((paid20k / pitched20k) * 100).toFixed(1) : '0.0',
+      revenue: revenue20k
+    }
+  };
+};
+
 export const calculateSetterStats = (appointments, setter) => {
   // Keep all appointments to count rescheduled
   const setterAppointments = appointments.filter(app => app.setterName === setter);
@@ -213,6 +343,14 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     salesPersonStats[person.name] = calculateSalesPersonStats(todayAppointments, person.name, selectedDate);
   });
 
+  // Calculate lead source statistics - include all appointments for this
+  const adsStats = calculateLeadSourceStats(
+    todayAppointments.filter(app => app.leadSource === 'ads')
+  );
+  const youtubeStats = calculateLeadSourceStats(
+    todayAppointments.filter(app => app.leadSource === 'youtube')
+  );
+
   // Count pitch types based on final status or overridden type - exclude rescheduled
   const pitched5k = activeAppointments.filter(app => 
     app.status === '5k_pitched' || 
@@ -254,6 +392,10 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     payments,
     totalRevenue,
     setterStats,
-    salesPersonStats
+    salesPersonStats,
+    leadSourceStats: {
+      ads: adsStats,
+      youtube: youtubeStats
+    }
   };
 };
