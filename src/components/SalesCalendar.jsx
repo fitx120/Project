@@ -341,7 +341,7 @@ const SalesCalendar = () => {
 
         <div className="grid grid-cols-6 gap-4 mt-4">
           <div className="bg-red-100 p-3 rounded">
-            <div className="text-lg">Didn't Pick</div>
+            <div className="text-lg">Didn't Show up</div>
             <div className="text-2xl font-bold">{stats.didntPick}</div>
           </div>
           <div className="bg-blue-100 p-3 rounded">

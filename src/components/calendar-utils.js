@@ -15,7 +15,7 @@ export const SETTERS = [
 export const getStatusDisplay = (status) => {
   const display = {
     'picked': 'Picked',
-    'didnt_pick': "Didn't Pick",
+    'didnt_pick': "Didn't Show up",
     'call_later': 'Call Later',
     'will_join_later': 'Will Join Later',
     'ghosted': 'Ghosted',
@@ -219,7 +219,7 @@ export const calculateStats = (appointments, salesPeople, selectedDate) => {
   // Add initial payment statistics - exclude rescheduled
   const initialPaymentPaid = activeAppointments.filter(app => app.initialPayment === 'paid').length;
   const initialPaymentNotPaid = activeAppointments.filter(app => app.initialPayment === 'unpaid').length;
-  
+
   // Get total rescheduled count
   const rescheduled = todayAppointments.filter(app => app.status === 'rescheduled').length;
 

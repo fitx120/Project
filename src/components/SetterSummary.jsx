@@ -34,7 +34,7 @@ const SetterSummary = ({ setterStats }) => {
               <th className="px-2 py-2 text-center border">Converted</th>
               <th className="px-2 py-2 text-center border">5K Conv.</th>
               <th className="px-2 py-2 text-center border">20K Conv.</th>
-              <th className="px-2 py-2 text-center border">Didn't Pick</th>
+              <th className="px-2 py-2 text-center border">Didn't Show up</th>
               <th className="px-2 py-2 text-center border">Wrong Qual.</th>
               <th className="px-2 py-2 text-center border">5K Rate</th>
               <th className="px-2 py-2 text-center border">20K Rate</th>
