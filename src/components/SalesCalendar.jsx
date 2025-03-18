@@ -183,8 +183,8 @@ const SalesCalendar = () => {
     }));
   };
 
-  const stats = useMemo(() => calculateStats(appointments, salesPeople, selectedDate), 
-    [appointments, salesPeople, selectedDate]);
+  const stats = useMemo(() => calculateStats(appointments, salesPeople, selectedDate, unavailableSlots), 
+    [appointments, salesPeople, selectedDate, unavailableSlots]);
 
   return (
     <div className="p-4 max-w-6xl mx-auto">

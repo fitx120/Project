@@ -155,7 +155,7 @@ export const calculateSalesPersonStats = (appointments, salesPerson, selectedDat
   };
 };
 
-export const calculateStats = (appointments, salesPeople, selectedDate) => {
+export const calculateStats = (appointments, salesPeople, selectedDate, unavailableSlots) => {
   // Filter today's appointments and exclude rescheduled ones for main stats
   const todayAppointments = appointments.filter(
     app => app.date.toDateString() === selectedDate.toDateString()
@@ -169,6 +169,14 @@ export const calculateStats = (appointments, salesPeople, selectedDate) => {
     if (!person.isPresent) return acc;
     const slots = countSlotsBetweenTimes(person.startTime, person.endTime);
     return acc + slots;
+  }, 0);
+
+  // Count manually marked unavailable slots
+  const unavailableCount = Object.entries(unavailableSlots).reduce((count, [key, isUnavailable]) => {
+    if (isUnavailable && key.includes(selectedDate.toDateString())) {
+      count++;
+    }
+    return count;
   }, 0);
 
   const paymentValues = {
@@ -227,7 +235,7 @@ export const calculateStats = (appointments, salesPeople, selectedDate) => {
   const booked = activeAppointments.length;
 
   return {
-    available: totalSlots - booked,
+    available: totalSlots - booked - unavailableCount,
     booked,
     rescheduled,
     initialPaymentPaid,
