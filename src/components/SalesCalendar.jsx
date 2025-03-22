@@ -11,7 +11,7 @@ import { formatTime, createTimeSlots, calculateStats, getStatusDisplay, getStatu
 import AppointmentForm from './forms/AppointmentForm';
 import StatusForm from './forms/StatusForm';
 import AppointmentTooltip from './AppointmentTooltip';
-import SetterSummary from './SetterSummary';
+import SetterPerformance from './SetterPerformance';
 import LeadSourcePerformance from './LeadSourcePerformance';
 import SalesPersonPerformance from './SalesPersonPerformance';
 
@@ -186,6 +186,11 @@ const SalesCalendar = () => {
 
   const stats = useMemo(() => calculateStats(appointments, salesPeople, selectedDate, unavailableSlots), 
     [appointments, salesPeople, selectedDate, unavailableSlots]);
+
+  const todayAppointments = useMemo(() => 
+    appointments.filter(app => app.date.toDateString() === selectedDate.toDateString()),
+    [appointments, selectedDate]
+  );
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
@@ -430,9 +435,9 @@ const SalesCalendar = () => {
         <SalesPersonPerformance salesPersonStats={stats.salesPersonStats} />
       </div>
 
-      {/* Setter Summary */}
+      {/* Setter Performance */}
       <div className="bg-gray-50 p-4 rounded-lg mt-6">
-        <SetterSummary setterStats={stats.setterStats} />
+        <SetterPerformance appointments={todayAppointments} />
       </div>
 
       {/* Lead Source Performance */}
