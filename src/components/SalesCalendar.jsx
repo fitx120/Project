@@ -12,8 +12,8 @@ import AppointmentForm from './forms/AppointmentForm';
 import StatusForm from './forms/StatusForm';
 import AppointmentTooltip from './AppointmentTooltip';
 import SetterSummary from './SetterSummary';
-import SalesPersonSummary from './SalesPersonSummary';
 import LeadSourcePerformance from './LeadSourcePerformance';
+import SalesPersonPerformance from './SalesPersonPerformance';
 
 const DEFAULT_SALES_PEOPLE = [
   { name: "Harsha", startTime: "11:00", endTime: "20:00", isPresent: true },
@@ -380,7 +380,6 @@ const SalesCalendar = () => {
 
         {/* Payment Summary */}
         <div className="mt-4">
-          <h3 className="font-bold mb-2">Payment Summary</h3>
           <div className="grid grid-cols-3 gap-4">
             <div className="bg-green-50 p-3 rounded">
               <div className="text-lg">10K</div>
@@ -414,6 +413,10 @@ const SalesCalendar = () => {
               <div className="text-lg">20K</div>
               <div className="text-xl font-bold">{stats.payments['20k'] || 0}</div>
             </div>
+            <div className="bg-green-50 p-3 rounded">
+              <div className="text-lg">5K Split</div>
+              <div className="text-xl font-bold">{stats.payments['5k_split'] || 0}</div>
+            </div>
             <div className="bg-green-100 p-3 rounded">
               <div className="text-lg">Total Revenue</div>
               <div className="text-xl font-bold">₹{stats.totalRevenue.toLocaleString()}</div>
@@ -424,7 +427,7 @@ const SalesCalendar = () => {
 
       {/* Sales Person Performance */}
       <div className="bg-gray-50 p-4 rounded-lg mt-6">
-        <SalesPersonSummary salesPersonStats={stats.salesPersonStats} />
+        <SalesPersonPerformance salesPersonStats={stats.salesPersonStats} />
       </div>
 
       {/* Setter Summary */}

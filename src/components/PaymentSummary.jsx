@@ -11,14 +11,15 @@ const PaymentRow = ({ label, count, amount }) => (
 
 const PaymentSummary = ({ payments = {} }) => {
   const paymentValues = {
-    '5k': 5000,
-    '4k': 4000,
+    '5k': 10000,  // Updated from 5000
+    '4k': 9000,   // Updated from 4000
     '1k_deposit': 1000,
     '5k_deposit': 5000,
     '6k_sub': 6000,
     '10k': 10000,
     '10k_2nd': 10000,
-    '20k': 20000
+    '20k': 20000,
+    '5k_split': 5000  // Add new payment type
   };
 
   const totalRevenue = Object.entries(payments).reduce((total, [type, count]) => {
@@ -26,14 +27,15 @@ const PaymentSummary = ({ payments = {} }) => {
   }, 0);
 
   const paymentLabels = {
-    '5k': '5K',
-    '4k': '4K',
+    '5k': '10K',          // Updated label
+    '4k': '9K',           // Updated label
     '1k_deposit': '1K Deposit',
     '5k_deposit': '5K Deposit',
     '6k_sub': '6K Subscription',
     '10k': '10K',
     '10k_2nd': '10K (2nd)',
-    '20k': '20K'
+    '20k': '20K',
+    '5k_split': '5K Split'  // Add new payment type
   };
 
   return (

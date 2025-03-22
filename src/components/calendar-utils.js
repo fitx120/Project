@@ -126,7 +126,7 @@ export const calculateLeadSourceStats = (appointments) => {
   const paid10k = appointments.filter(app => 
     app.status === 'paid' && 
     app.pitchedType === '5k_pitched' &&
-    ['5k', '4k', '1k_deposit'].includes(app.paymentType)
+    ['5k', '4k', '1k_deposit', '5k_split'].includes(app.paymentType)
   ).length;
 
   const revenue10k = appointments.reduce((total, app) => {
@@ -134,7 +134,8 @@ export const calculateLeadSourceStats = (appointments) => {
       const values = {
         '5k': 10000,
         '4k': 9000,
-        '1k_deposit': 1000
+        '1k_deposit': 1000,
+        '5k_split': 5000
       };
       return total + (values[app.paymentType] || 0);
     }
@@ -205,16 +206,12 @@ export const calculateLeadSourceStats = (appointments) => {
 };
 
 export const calculateSetterStats = (appointments, setter) => {
-  // Keep all appointments to count rescheduled
   const setterAppointments = appointments.filter(app => app.setterName === setter);
-  
-  // Filter active appointments for other stats
   const activeAppointments = setterAppointments.filter(app => app.status !== 'rescheduled');
   
   return {
     total: activeAppointments.length,
     rescheduled: setterAppointments.filter(app => app.status === 'rescheduled').length,
-    // Count actual pitch types (including overrides)
     pitch5k: activeAppointments.filter(app => 
       app.status === '5k_pitched' || 
       (app.status === 'paid' && app.pitchedType === '5k_pitched')
@@ -223,10 +220,8 @@ export const calculateSetterStats = (appointments, setter) => {
       app.status === '20k_pitched' || 
       (app.status === 'paid' && app.pitchedType === '20k_pitched')
     ).length,
-    // Initial pitch types set by setter
     initialPitch5k: activeAppointments.filter(app => app.initialPitchType === '5k_pitched').length,
     initialPitch20k: activeAppointments.filter(app => app.initialPitchType === '20k_pitched').length,
-    // Other stats
     converted: activeAppointments.filter(app => app.status === 'paid').length,
     converted5k: activeAppointments.filter(app => 
       app.status === 'paid' && 
@@ -246,7 +241,6 @@ export const calculateSetterStats = (appointments, setter) => {
 };
 
 export const calculateSalesPersonStats = (appointments, salesPerson, selectedDate) => {
-  // Filter out rescheduled appointments before calculating stats
   const activeAppointments = appointments.filter(
     app => 
       app.status !== 'rescheduled' && 
@@ -267,12 +261,25 @@ export const calculateSalesPersonStats = (appointments, salesPerson, selectedDat
     (app.status === 'paid' && app.pitchedType === '20k_pitched')
   ).length;
 
-  const payments = activeAppointments.reduce((acc, app) => {
-    if (app.paymentType) {
-      acc[app.paymentType] = (acc[app.paymentType] || 0) + 1;
+  // Create payments object with all possible payment types initialized to 0
+  const payments = {
+    '5k': 0,
+    '4k': 0,
+    '1k_deposit': 0,
+    '5k_split': 0,
+    '5k_deposit': 0,
+    '6k_sub': 0,
+    '10k': 0,
+    '10k_2nd': 0,
+    '20k': 0
+  };
+
+  // Update payment counts
+  activeAppointments.forEach(app => {
+    if (app.status === 'paid' && app.paymentType) {
+      payments[app.paymentType] = (payments[app.paymentType] || 0) + 1;
     }
-    return acc;
-  }, {});
+  });
 
   return {
     booked5k,
@@ -286,7 +293,6 @@ export const calculateSalesPersonStats = (appointments, salesPerson, selectedDat
 };
 
 export const calculateStats = (appointments, salesPeople, selectedDate, unavailableSlots) => {
-  // Filter today's appointments and exclude rescheduled ones for main stats
   const todayAppointments = appointments.filter(
     app => app.date.toDateString() === selectedDate.toDateString()
   );
@@ -301,24 +307,12 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     return acc + slots;
   }, 0);
 
-  // Count manually marked unavailable slots
   const unavailableCount = Object.entries(unavailableSlots).reduce((count, [key, isUnavailable]) => {
     if (isUnavailable && key.includes(selectedDate.toDateString())) {
       count++;
     }
     return count;
   }, 0);
-
-  const paymentValues = {
-    '5k': 10000,  // Updated from 5000
-    '4k': 9000,   // Updated from 4000
-    '1k_deposit': 1000,
-    '5k_deposit': 5000,
-    '6k_sub': 6000,
-    '10k': 10000,
-    '10k_2nd': 10000,
-    '20k': 20000
-  };
 
   const payments = activeAppointments.reduce((acc, app) => {
     if (app.paymentType) {
@@ -327,23 +321,32 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     return acc;
   }, {});
 
+  const paymentValues = {
+    '5k': 10000,
+    '4k': 9000,
+    '1k_deposit': 1000,
+    '5k_split': 5000,
+    '5k_deposit': 5000,
+    '6k_sub': 6000,
+    '10k': 10000,
+    '10k_2nd': 10000,
+    '20k': 20000
+  };
+
   const totalRevenue = Object.entries(payments).reduce((total, [type, count]) => {
     return total + (paymentValues[type] * count);
   }, 0);
 
-  // Calculate setter statistics - only use active (non-rescheduled) appointments
   const setterStats = {};
   SETTERS.forEach(setter => {
     setterStats[setter] = calculateSetterStats(todayAppointments, setter);
   });
 
-  // Calculate sales person statistics - only use active appointments
   const salesPersonStats = {};
   salesPeople.forEach(person => {
     salesPersonStats[person.name] = calculateSalesPersonStats(todayAppointments, person.name, selectedDate);
   });
 
-  // Calculate lead source statistics - include all appointments for this
   const adsStats = calculateLeadSourceStats(
     todayAppointments.filter(app => app.leadSource === 'ads')
   );
@@ -351,7 +354,6 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     todayAppointments.filter(app => app.leadSource === 'youtube')
   );
 
-  // Count pitch types based on final status or overridden type - exclude rescheduled
   const pitched5k = activeAppointments.filter(app => 
     app.status === '5k_pitched' || 
     (app.status === 'paid' && app.pitchedType === '5k_pitched')
@@ -362,14 +364,9 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     (app.status === 'paid' && app.pitchedType === '20k_pitched')
   ).length;
 
-  // Add initial payment statistics - exclude rescheduled
   const initialPaymentPaid = activeAppointments.filter(app => app.initialPayment === 'paid').length;
   const initialPaymentNotPaid = activeAppointments.filter(app => app.initialPayment === 'unpaid').length;
-
-  // Get total rescheduled count
   const rescheduled = todayAppointments.filter(app => app.status === 'rescheduled').length;
-
-  // Count booked (already excludes rescheduled as we're using activeAppointments)
   const booked = activeAppointments.length;
 
   return {

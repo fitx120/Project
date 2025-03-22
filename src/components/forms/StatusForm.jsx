@@ -187,6 +187,7 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
                     <option value="5k">10K</option>
                     <option value="4k">9K</option>
                     <option value="1k_deposit">1000 Deposit</option>
+                    <option value="5k_split">5000 Split</option>
                     <option value="20k">20K</option>
                     <option value="10k">10K</option>
                     <option value="10k_2nd">10K 2nd Ins</option>
