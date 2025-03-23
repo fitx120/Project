@@ -202,7 +202,7 @@ export const calculateLeadSourceStats = (appointments) => {
       closingRate: pitched20k > 0 ? ((paid20k / pitched20k) * 100).toFixed(1) : '0.0',
       revenue: revenue20k
     },
-    appointments: appointments  // Add this line to include appointments
+    appointments: appointments
   };
 };
 
@@ -252,6 +252,16 @@ export const calculateSalesPersonStats = (appointments, salesPerson, selectedDat
   const booked5k = activeAppointments.filter(app => app.initialPitchType === '5k_pitched').length;
   const booked20k = activeAppointments.filter(app => app.initialPitchType === '20k_pitched').length;
 
+  const didntShow10k = activeAppointments.filter(app => 
+    app.initialPitchType === '5k_pitched' && 
+    ['didnt_pick', 'call_later', 'rescheduled', 'wrong_number'].includes(app.status)
+  ).length;
+
+  const didntShow20k = activeAppointments.filter(app => 
+    app.initialPitchType === '20k_pitched' && 
+    ['didnt_pick', 'call_later', 'rescheduled', 'wrong_number'].includes(app.status)
+  ).length;
+
   const totalPitch5k = activeAppointments.filter(app => 
     app.status === '5k_pitched' || 
     (app.status === 'paid' && app.pitchedType === '5k_pitched')
@@ -285,6 +295,8 @@ export const calculateSalesPersonStats = (appointments, salesPerson, selectedDat
   return {
     booked5k,
     booked20k,
+    didntShow10k,
+    didntShow20k,  // Add to returned object
     totalPitch5k,
     totalPitch20k,
     payments,
