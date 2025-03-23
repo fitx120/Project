@@ -1,8 +1,124 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+
+// Helper function to analyze NoShows
+const analyzeNoShows = (appointments) => {
+  const noShowStatuses = ['didnt_pick', 'call_later', 'rescheduled', 'wrong_number'];
+  
+  // Initialize stats object
+  const stats = {
+    ads: {
+      total10k: 0,
+      total20k: 0,
+      byStatus10k: {
+        didnt_pick: 0,
+        call_later: 0,
+        rescheduled: 0,
+        wrong_number: 0
+      },
+      byStatus20k: {
+        didnt_pick: 0,
+        call_later: 0,
+        rescheduled: 0,
+        wrong_number: 0
+      }
+    },
+    youtube: {
+      total10k: 0,
+      total20k: 0,
+      byStatus10k: {
+        didnt_pick: 0,
+        call_later: 0,
+        rescheduled: 0,
+        wrong_number: 0
+      },
+      byStatus20k: {
+        didnt_pick: 0,
+        call_later: 0,
+        rescheduled: 0,
+        wrong_number: 0
+      }
+    }
+  };
+
+  // Analyze each appointment
+  appointments.forEach(app => {
+    if (noShowStatuses.includes(app.status)) {
+      const source = app.leadSource || 'unknown';
+      if (source !== 'unknown') {
+        if (app.initialPitchType === '5k_pitched') {
+          stats[source].total10k++;
+          stats[source].byStatus10k[app.status]++;
+        } else if (app.initialPitchType === '20k_pitched') {
+          stats[source].total20k++;
+          stats[source].byStatus20k[app.status]++;
+        }
+      }
+    }
+  });
+
+  // Calculate total appointments for show-up rate
+  const total = {
+    ads: {
+      total10k: appointments.filter(app => 
+        app.leadSource === 'ads' && app.initialPitchType === '5k_pitched'
+      ).length,
+      total20k: appointments.filter(app => 
+        app.leadSource === 'ads' && app.initialPitchType === '20k_pitched'
+      ).length
+    },
+    youtube: {
+      total10k: appointments.filter(app => 
+        app.leadSource === 'youtube' && app.initialPitchType === '5k_pitched'
+      ).length,
+      total20k: appointments.filter(app => 
+        app.leadSource === 'youtube' && app.initialPitchType === '20k_pitched'
+      ).length
+    }
+  };
+
+  return { stats, total };
+};
+
+const NoShowReport = ({ source, stats, total, type }) => (
+  <div className="mb-4">
+    <h3 className="font-bold mb-2">{type} Appointments</h3>
+    <table className="w-full text-sm">
+      <tbody>
+        <tr className="bg-gray-50">
+          <td className="px-2 py-1">Total Scheduled:</td>
+          <td className="px-2 py-1 text-right">{total[`total${type}`]}</td>
+        </tr>
+        <tr>
+          <td className="px-2 py-1">Total NoShows:</td>
+          <td className="px-2 py-1 text-right">{stats[`total${type}`]}</td>
+        </tr>
+        <tr className="bg-gray-50">
+          <td className="px-2 py-1">NoShow Rate:</td>
+          <td className="px-2 py-1 text-right">
+            {((stats[`total${type}`] / Math.max(1, total[`total${type}`])) * 100).toFixed(1)}%
+          </td>
+        </tr>
+        <tr>
+          <td colSpan="2" className="px-2 py-1 font-medium">Breakdown:</td>
+        </tr>
+        {Object.entries(stats[`byStatus${type}`]).map(([status, count]) => (
+          <tr key={status} className="bg-gray-50">
+            <td className="px-2 py-1 pl-4">{status}:</td>
+            <td className="px-2 py-1 text-right">{count}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 
 const LeadSourcePerformance = ({ leadSourceStats }) => {
   const { ads, youtube } = leadSourceStats;
+  const [noShowData, setNoShowData] = useState(null);
+  const [showNoShowModal, setShowNoShowModal] = useState(false);
+  console.log('Has ads appointments:', Boolean(ads.appointments));
+  console.log('Has youtube appointments:', Boolean(youtube.appointments));
 
   // Calculate totals
   const totals = {
@@ -32,9 +148,84 @@ const LeadSourcePerformance = ({ leadSourceStats }) => {
     }
   };
 
+  // Analyze NoShows when component mounts or appointments change
+  useEffect(() => {
+    if (ads.appointments && youtube.appointments) {
+      const data = analyzeNoShows([...ads.appointments, ...youtube.appointments]);
+      console.log('NoShow Data:', data); // Debug log
+      setNoShowData(data);
+    }
+  }, [ads.appointments, youtube.appointments]);
+
   return (
     <div className="mt-6">
-      <h2 className="text-lg font-bold mb-4">Lead Source Performance</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-bold">Lead Source Performance</h2>
+        {ads.appointments && youtube.appointments && (
+          <button
+            onClick={() => {
+              console.log('Button clicked'); // Debug log
+              setShowNoShowModal(true);
+            }}
+            className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+          >
+            View NoShow Analysis
+          </button>
+        )}
+      </div>
+
+      {/* NoShow Analysis Modal */}
+      {showNoShowModal && noShowData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center" style={{ zIndex: 9999 }}>
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto relative">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold">NoShow Analysis</h2>
+              <button 
+                onClick={() => setShowNoShowModal(false)}
+                className="text-gray-500 hover:text-gray-700 absolute top-4 right-4"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="border rounded p-4">
+                <h3 className="text-lg font-bold mb-4">Meta Ads</h3>
+                <NoShowReport 
+                  source="ads"
+                  stats={noShowData.stats.ads}
+                  total={noShowData.total.ads}
+                  type="10k"
+                />
+                <NoShowReport 
+                  source="ads"
+                  stats={noShowData.stats.ads}
+                  total={noShowData.total.ads}
+                  type="20k"
+                />
+              </div>
+
+              <div className="border rounded p-4">
+                <h3 className="text-lg font-bold mb-4">YouTube</h3>
+                <NoShowReport 
+                  source="youtube"
+                  stats={noShowData.stats.youtube}
+                  total={noShowData.total.youtube}
+                  type="10k"
+                />
+                <NoShowReport 
+                  source="youtube"
+                  stats={noShowData.stats.youtube}
+                  total={noShowData.total.youtube}
+                  type="20k"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Original Table */}
       <div className="overflow-x-auto">
         <table className="min-w-full border-collapse border">
           <thead>
@@ -105,6 +296,13 @@ const LeadSourcePerformance = ({ leadSourceStats }) => {
   );
 };
 
+NoShowReport.propTypes = {
+  source: PropTypes.string.isRequired,
+  stats: PropTypes.object.isRequired,
+  total: PropTypes.object.isRequired,
+  type: PropTypes.string.isRequired
+};
+
 LeadSourcePerformance.propTypes = {
   leadSourceStats: PropTypes.shape({
     ads: PropTypes.shape({
@@ -127,7 +325,8 @@ LeadSourcePerformance.propTypes = {
         paid: PropTypes.number.isRequired,
         closingRate: PropTypes.string.isRequired,
         revenue: PropTypes.number.isRequired
-      }).isRequired
+      }).isRequired,
+      appointments: PropTypes.array
     }).isRequired,
     youtube: PropTypes.shape({
       stats10k: PropTypes.shape({
@@ -149,7 +348,8 @@ LeadSourcePerformance.propTypes = {
         paid: PropTypes.number.isRequired,
         closingRate: PropTypes.string.isRequired,
         revenue: PropTypes.number.isRequired
-      }).isRequired
+      }).isRequired,
+      appointments: PropTypes.array
     }).isRequired
   }).isRequired
 };

@@ -201,7 +201,8 @@ export const calculateLeadSourceStats = (appointments) => {
       paid: paid20k,
       closingRate: pitched20k > 0 ? ((paid20k / pitched20k) * 100).toFixed(1) : '0.0',
       revenue: revenue20k
-    }
+    },
+    appointments: appointments  // Add this line to include appointments
   };
 };
 
@@ -347,12 +348,11 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     salesPersonStats[person.name] = calculateSalesPersonStats(todayAppointments, person.name, selectedDate);
   });
 
-  const adsStats = calculateLeadSourceStats(
-    todayAppointments.filter(app => app.leadSource === 'ads')
-  );
-  const youtubeStats = calculateLeadSourceStats(
-    todayAppointments.filter(app => app.leadSource === 'youtube')
-  );
+  const adsAppointments = todayAppointments.filter(app => app.leadSource === 'ads');
+  const youtubeAppointments = todayAppointments.filter(app => app.leadSource === 'youtube');
+
+  const adsStats = calculateLeadSourceStats(adsAppointments);
+  const youtubeStats = calculateLeadSourceStats(youtubeAppointments);
 
   const pitched5k = activeAppointments.filter(app => 
     app.status === '5k_pitched' || 
@@ -391,8 +391,14 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     setterStats,
     salesPersonStats,
     leadSourceStats: {
-      ads: adsStats,
-      youtube: youtubeStats
+      ads: {
+        ...adsStats,
+        appointments: adsAppointments
+      },
+      youtube: {
+        ...youtubeStats,
+        appointments: youtubeAppointments
+      }
     }
   };
 };
