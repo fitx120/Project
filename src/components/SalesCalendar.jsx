@@ -18,7 +18,7 @@ import SalesPersonPerformance from './SalesPersonPerformance';
 const DEFAULT_SALES_PEOPLE = [
   { name: "Harsha", startTime: "11:00", endTime: "20:00", isPresent: true },
   { name: "Mani", startTime: "11:00", endTime: "19:00", isPresent: true },
-  { name: "Monish", startTime: "16:30", endTime: "20:30", isPresent: true },
+  { name: "Monish", startTime: "17:00", endTime: "21:00", isPresent: true },
   { name: "Pranav", startTime: "09:30", endTime: "14:00", isPresent: true },
   { name: "Tamil", startTime: "11:00", endTime: "20:00", isPresent: true }
 ];
