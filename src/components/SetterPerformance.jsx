@@ -23,6 +23,7 @@ const SetterPerformance = ({ appointments = [] }) => {
         rescheduled: 0,
         didntShowUp: 0,
         totalPitched: 0,
+        wronglyQualified: 0,
         total10kSet: 0,
         total10kPitched: 0,
         paid10k: 0,
@@ -60,6 +61,7 @@ const SetterPerformance = ({ appointments = [] }) => {
       total,
       rescheduled: setterAppointments.filter(app => app.status === 'rescheduled').length,
       didntShowUp: setterAppointments.filter(app => app.status === 'didnt_pick').length,
+      wronglyQualified: setterAppointments.filter(app => app.status === 'wrongly_qualified').length,
       totalPitched: total10kPitched + total20kPitched,
       total10kSet,
       total10kPitched,
@@ -97,6 +99,7 @@ const SetterPerformance = ({ appointments = [] }) => {
               <th className="px-4 py-2 text-center border bg-cyan-50">Total Set</th>
               <th className="px-4 py-2 text-center border bg-amber-50">Rescheduled</th>
               <th className="px-4 py-2 text-center border bg-red-50">Didn't Show up</th>
+              <th className="px-4 py-2 text-center border bg-red-50">Wrongly Qualified</th>
               <th className="px-4 py-2 text-center border bg-blue-50">Total Pitched</th>
               <th className="px-4 py-2 text-center border bg-cyan-50">10K Set</th>
               <th className="px-4 py-2 text-center border bg-cyan-100">10K Pitched</th>
@@ -126,6 +129,7 @@ const SetterPerformance = ({ appointments = [] }) => {
                   <td className="px-4 py-2 text-center border bg-cyan-50">{stats.total}</td>
                   <td className="px-4 py-2 text-center border bg-amber-50">{stats.rescheduled}</td>
                   <td className="px-4 py-2 text-center border bg-red-50">{stats.didntShowUp}</td>
+                  <td className="px-4 py-2 text-center border bg-red-50">{stats.wronglyQualified}</td>
                   <td className="px-4 py-2 text-center border bg-blue-50">{stats.totalPitched}</td>
                   <td className="px-4 py-2 text-center border bg-cyan-50">{stats.total10kSet}</td>
                   <td className="px-4 py-2 text-center border bg-cyan-100">{stats.total10kPitched}</td>
@@ -149,6 +153,7 @@ const SetterPerformance = ({ appointments = [] }) => {
               <td className="px-4 py-2 text-center border bg-cyan-50">{totalStats.total}</td>
               <td className="px-4 py-2 text-center border bg-amber-50">{totalStats.rescheduled}</td>
               <td className="px-4 py-2 text-center border bg-red-50">{totalStats.didntShowUp}</td>
+              <td className="px-4 py-2 text-center border bg-red-50">{totalStats.wronglyQualified}</td>
               <td className="px-4 py-2 text-center border bg-blue-50">{totalStats.totalPitched}</td>
               <td className="px-4 py-2 text-center border bg-cyan-50">{totalStats.total10kSet}</td>
               <td className="px-4 py-2 text-center border bg-cyan-100">{totalStats.total10kPitched}</td>

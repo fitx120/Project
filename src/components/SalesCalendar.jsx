@@ -8,6 +8,7 @@ import {
   loadAttendanceStatus 
 } from '../firebase';
 import { formatTime, createTimeSlots, calculateStats, getStatusDisplay, getStatusColor } from './calendar-utils';
+import { validateCalculations } from './test-calculations';
 import AppointmentForm from './forms/AppointmentForm';
 import StatusForm from './forms/StatusForm';
 import AppointmentTooltip from './AppointmentTooltip';
@@ -77,6 +78,13 @@ const SalesCalendar = () => {
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
+  };
+
+  const handleTestCalculations = () => {
+    console.log('Running validation with test data...');
+    // Pass undefined to force using test data
+    const results = validateCalculations(undefined);
+    console.log('Test Results:', results.summary);
   };
 
   const handleBookAppointment = useCallback(async (formData) => {
@@ -194,14 +202,21 @@ const SalesCalendar = () => {
 
   return (
     <div className="p-4 max-w-6xl mx-auto">
-      {/* Date selector */}
-      <div className="mb-4">
+      {/* Date selector and Test button */}
+      <div className="mb-4 flex justify-between items-center">
         <input
           type="date"
           className="border p-2 rounded"
           value={selectedDate.toISOString().split('T')[0]}
           onChange={e => handleDateChange(new Date(e.target.value))}
         />
+        <button
+          onClick={handleTestCalculations}
+          className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded text-sm"
+          title="Run calculation validations"
+        >
+          Verify Calculations
+        </button>
       </div>
 
       {/* Main booking table */}
