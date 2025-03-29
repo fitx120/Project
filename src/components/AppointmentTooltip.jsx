@@ -3,6 +3,25 @@ import PropTypes from 'prop-types';
 import { getStatusDisplay } from './calendar-utils';
 import { format } from 'date-fns';
 
+const formatDate = (dateStr) => {
+  try {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Invalid Date';
+  }
+};
+
+const formatTime = (timeStr) => {
+  try {
+    return format(new Date(`2024-01-01 ${timeStr}`), 'hh:mm aa');
+  } catch (error) {
+    console.error('Error formatting time:', error);
+    return timeStr;
+  }
+};
+
 const AppointmentTooltip = ({ appointment, position }) => (
   <div
     className="absolute bg-white shadow-lg p-4 rounded z-50 w-72"
@@ -58,7 +77,7 @@ const AppointmentTooltip = ({ appointment, position }) => (
         
         <p className="text-sm">
           <span className="font-medium">Time:</span>{' '}
-          {format(new Date(`2024-01-01 ${appointment.time}`), 'hh:mm aa')}
+          {formatTime(appointment.time)}
         </p>
         
         <p className="text-sm">
@@ -93,6 +112,25 @@ const AppointmentTooltip = ({ appointment, position }) => (
             {appointment.paymentType}
           </p>
         )}
+
+        <div className="mt-2 pt-2 border-t">
+          {appointment.status === 'rescheduled' && appointment.rescheduledTo && (
+            <p className="text-sm text-gray-600">
+              <span className="font-medium">Rescheduled to:</span>{' '}
+              {formatDate(appointment.rescheduledTo.date)}{' '}
+              {appointment.rescheduledTo.time && formatTime(appointment.rescheduledTo.time)}{' '}
+              with {appointment.rescheduledTo.salesPerson}
+            </p>
+          )}
+          {appointment.rescheduledFrom && (
+            <p className="text-sm text-gray-600 mt-1">
+              <span className="font-medium">Rescheduled from:</span>{' '}
+              {formatDate(appointment.rescheduledFrom.date)}{' '}
+              {appointment.rescheduledFrom.time && formatTime(appointment.rescheduledFrom.time)}{' '}
+              with {appointment.rescheduledFrom.salesPerson}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   </div>
@@ -113,7 +151,17 @@ AppointmentTooltip.propTypes = {
     callLaterDateTime: PropTypes.string,
     callNotes: PropTypes.string,
     paymentType: PropTypes.string,
-    pitchedType: PropTypes.string
+    pitchedType: PropTypes.string,
+    rescheduledFrom: PropTypes.shape({
+      date: PropTypes.string,
+      time: PropTypes.string,
+      salesPerson: PropTypes.string
+    }),
+    rescheduledTo: PropTypes.shape({
+      date: PropTypes.string,
+      time: PropTypes.string,
+      salesPerson: PropTypes.string
+    })
   }).isRequired,
   position: PropTypes.shape({
     x: PropTypes.number.isRequired,

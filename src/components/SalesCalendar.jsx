@@ -123,14 +123,11 @@ const SalesCalendar = () => {
 
   const handleReschedule = useCallback(async (newAppointment) => {
     try {
-      await saveAppointment({
-        ...newAppointment,
-        date: new Date(selectedDate)
-      });
+      await saveAppointment(newAppointment);
     } catch (error) {
       console.error('Error rescheduling appointment:', error);
     }
-  }, [selectedDate]);
+  }, []);
 
   const toggleAttendance = async (index) => {
     const person = salesPeople[index];

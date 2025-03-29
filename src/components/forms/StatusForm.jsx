@@ -48,8 +48,24 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
         appointment={appointment}
         onClose={() => setShowRescheduleForm(false)}
         onReschedule={(newAppointment) => {
-          onUpdateStatus(appointment.id, { status: 'rescheduled' });
-          onReschedule(newAppointment);
+          // Update the original appointment with rescheduled details
+          onUpdateStatus(appointment.id, { 
+            status: 'rescheduled',
+            rescheduledTo: {
+              date: newAppointment.date.toISOString().split('T')[0],
+              time: newAppointment.time,
+              salesPerson: newAppointment.salesPerson
+            }
+          });
+          // Pass the rescheduled from details to the new appointment
+          onReschedule({
+            ...newAppointment,
+            rescheduledFrom: {
+              date: appointment.date.toISOString().split('T')[0],
+              time: appointment.time,
+              salesPerson: appointment.salesPerson
+            }
+          });
           onClose();
         }}
         salesPeople={salesPeople}

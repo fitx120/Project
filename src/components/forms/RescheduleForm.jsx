@@ -5,6 +5,7 @@ import { formatTime, createTimeSlots } from '../calendar-utils';
 const RescheduleForm = ({ appointment, onClose, onReschedule, salesPeople }) => {
   const [selectedSalesPerson, setSelectedSalesPerson] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   
   const timeSlots = useMemo(() => createTimeSlots(), []);
 
@@ -15,7 +16,13 @@ const RescheduleForm = ({ appointment, onClose, onReschedule, salesPeople }) => 
       salesPerson: selectedSalesPerson,
       time: selectedTime,
       status: 'booked',
-      id: Date.now()
+      id: Date.now(),
+      date: new Date(selectedDate),
+      rescheduledFrom: {
+        date: appointment.date,
+        time: appointment.time,
+        salesPerson: appointment.salesPerson
+      }
     };
     onReschedule(newAppointment);
     onClose();
@@ -26,6 +33,17 @@ const RescheduleForm = ({ appointment, onClose, onReschedule, salesPeople }) => 
       <div className="bg-white p-6 rounded-lg w-96">
         <h2 className="text-xl font-bold mb-4">Reschedule Appointment</h2>
         <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block mb-2">Date *</label>
+            <input
+              type="date"
+              className="w-full border p-2 rounded"
+              value={selectedDate}
+              onChange={e => setSelectedDate(e.target.value)}
+              min={new Date().toISOString().split('T')[0]}
+              required
+            />
+          </div>
           <div className="mb-4">
             <label className="block mb-2">Sales Person</label>
             <select
