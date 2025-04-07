@@ -5,6 +5,7 @@ import {
   subscribeToAppointments,
   saveAttendanceStatus,
   subscribeToAttendance,
+  subscribeToUnavailableSlots,
   loadAttendanceStatus 
 } from '../firebase';
 import { formatTime, createTimeSlots, calculateStats, getStatusDisplay, getStatusColor } from './calendar-utils';
@@ -33,7 +34,8 @@ const SalesCalendar = () => {
   const [hoveredAppointment, setHoveredAppointment] = useState(null);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [unavailableSlots, setUnavailableSlots] = useState({});
+  const [userUnavailableSlots, setUserUnavailableSlots] = useState({});
+  const [defaultUnavailableSlots, setDefaultUnavailableSlots] = useState({});
 
   const timeSlots = useMemo(() => createTimeSlots(), []);
 
@@ -169,9 +171,65 @@ const SalesCalendar = () => {
     }
   };
 
-  const handleSlotClick = (person, time, isUnavailable) => {
+  // Subscribe to default unavailable slots
+  useEffect(() => {
+    const unsubscribe = subscribeToUnavailableSlots(setDefaultUnavailableSlots);
+    return () => unsubscribe();
+  }, []);
+
+  const isSlotUnavailable = useCallback((person, time) => {
+    // Check global default slots
+    const isGlobalBreak = Object.entries(defaultUnavailableSlots)
+      .some(([key, slot]) => {
+        const timeFromKey = key.split('_')[1];
+        return slot.isGlobal && timeFromKey === time;
+      });
+
+    // Check personal default slots
+    const isPersonalUnavailable = Object.entries(defaultUnavailableSlots)
+      .some(([key, slot]) => {
+        const [, name, timeFromKey] = key.split('_');
+        return !slot.isGlobal && name.toLowerCase() === person.name.toLowerCase() && timeFromKey === time;
+      });
+
+    // Check user-set unavailable slots
     const slotKey = `${person.name}-${time}-${selectedDate.toDateString()}`;
-    if (isUnavailable || unavailableSlots[slotKey]) {
+    const isUserSetUnavailable = userUnavailableSlots[slotKey];
+
+    return isGlobalBreak || isPersonalUnavailable || isUserSetUnavailable;
+  }, [defaultUnavailableSlots, userUnavailableSlots, selectedDate]);
+
+  const getSlotLabel = useCallback((person, time) => {
+    // Check for global break slots
+    const globalBreak = Object.entries(defaultUnavailableSlots)
+      .find(([key, slot]) => {
+        const timeFromKey = key.split('_')[1];
+        return slot.isGlobal && timeFromKey === time;
+      });
+    
+    if (globalBreak) {
+      return globalBreak[1].label;
+    }
+
+    // Check for personal unavailable slots
+    const personalSlot = Object.entries(defaultUnavailableSlots)
+      .find(([key, slot]) => {
+        const [, name, timeFromKey] = key.split('_');
+        return !slot.isGlobal && name.toLowerCase() === person.name.toLowerCase() && timeFromKey === time;
+      });
+
+    if (personalSlot) {
+      return personalSlot[1].label;
+    }
+
+    return 'Unavailable';
+  }, [defaultUnavailableSlots]);
+
+  const handleSlotClick = (person, time, notAvailable) => {
+    const slotKey = `${person.name}-${time}-${selectedDate.toDateString()}`;
+    const isUnavailable = isSlotUnavailable(person, time);
+    
+    if (notAvailable || isUnavailable) {
       const confirmBook = window.confirm(
         'This slot is marked as unavailable. Would you still like to book it?'
       );
@@ -183,14 +241,14 @@ const SalesCalendar = () => {
 
   const toggleUnavailable = (person, time) => {
     const slotKey = `${person.name}-${time}-${selectedDate.toDateString()}`;
-    setUnavailableSlots(prev => ({
+    setUserUnavailableSlots(prev => ({
       ...prev,
       [slotKey]: !prev[slotKey]
     }));
   };
 
-  const stats = useMemo(() => calculateStats(appointments, salesPeople, selectedDate, unavailableSlots), 
-    [appointments, salesPeople, selectedDate, unavailableSlots]);
+  const stats = useMemo(() => calculateStats(appointments, salesPeople, selectedDate, userUnavailableSlots, defaultUnavailableSlots), 
+    [appointments, salesPeople, selectedDate, userUnavailableSlots, defaultUnavailableSlots]);
 
   const todayAppointments = useMemo(() => 
     appointments.filter(app => app.date.toDateString() === selectedDate.toDateString()),
@@ -291,25 +349,42 @@ const SalesCalendar = () => {
                         <div className="relative">
                           <button
                             className={`w-full p-2 ${
-                              isTimeAvailable && !unavailableSlots[slotKey]
-                                ? 'bg-green-600 hover:bg-green-700' 
-                                : 'bg-gray-400 hover:bg-gray-500'
+                              (() => {
+                                const isDefUnavailable = isSlotUnavailable(person, time);
+                                const isBreakTime = Object.entries(defaultUnavailableSlots)
+                                  .some(([key, slot]) => {
+                                    const timeFromKey = key.split('_')[1];
+                                    return slot.isGlobal && timeFromKey === time;
+                                  });
+                                
+                                if (isBreakTime) return 'bg-yellow-400 hover:bg-yellow-500';
+                                if (isTimeAvailable && !isDefUnavailable && !userUnavailableSlots[slotKey]) 
+                                  return 'bg-green-600 hover:bg-green-700';
+                                return 'bg-gray-400 hover:bg-gray-500';
+                              })()
                             } text-white rounded`}
-                            onClick={() => handleSlotClick(person, time, !isTimeAvailable || unavailableSlots[slotKey])}
+                            onClick={() => handleSlotClick(person, time, !isTimeAvailable || isSlotUnavailable(person, time))}
                           >
-                            {isTimeAvailable && !unavailableSlots[slotKey] ? 'Available' : 'Unavailable'}
+                            {(() => {
+                              const isDefUnavailable = isSlotUnavailable(person, time);
+                              if (!isTimeAvailable || isDefUnavailable || userUnavailableSlots[slotKey]) {
+                                const label = getSlotLabel(person, time);
+                                return label === 'Unavailable' && isTimeAvailable ? 'Unavailable' : label;
+                              }
+                              return 'Available';
+                            })()}
                           </button>
                           {isTimeAvailable && (
                             <button
                               className={`absolute top-0 right-0 -mr-0.5 -mt-0.5 ${
-                                unavailableSlots[slotKey] 
+                                userUnavailableSlots[slotKey] 
                                   ? 'bg-green-500 hover:bg-green-600' 
                                   : 'bg-black/20 hover:bg-black/30'
                               } text-white rounded-full w-4 h-4 text-[10px] flex items-center justify-center`}
                               onClick={() => toggleUnavailable(person, time)}
-                              title={unavailableSlots[slotKey] ? "Mark as Available" : "Mark as Unavailable"}
+                              title={userUnavailableSlots[slotKey] ? "Mark as Available" : "Mark as Unavailable"}
                             >
-                              {unavailableSlots[slotKey] ? '✓' : '×'}
+                              {userUnavailableSlots[slotKey] ? '✓' : '×'}
                             </button>
                           )}
                         </div>
@@ -336,11 +411,11 @@ const SalesCalendar = () => {
             <div className="text-2xl font-bold">{stats.booked}</div>
           </div>
           <div className="bg-emerald-100 p-3 rounded">
-            <div className="text-lg">1.50 Paid</div>
+            <div className="text-lg">50 Paid</div>
             <div className="text-2xl font-bold">{stats.initialPaymentPaid}</div>
           </div>
           <div className="bg-red-50 p-3 rounded">
-            <div className="text-lg">1.50 Not Paid</div>
+            <div className="text-lg">50 Not Paid</div>
             <div className="text-2xl font-bold">{stats.initialPaymentNotPaid}</div>
           </div>
           <div className="bg-amber-100 p-3 rounded">

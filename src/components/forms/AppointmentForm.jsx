@@ -7,7 +7,7 @@ const SETTERS = [
   'Vikneswar',
   'Hemaanth',
   'Harneesh',
-  'Hitesh',
+  'Krishna',
   'Kumaran',
   'Sethu',
   'Prasanna',
@@ -130,7 +130,7 @@ const AppointmentForm = ({ onClose, onSubmit, salesPerson, time, isUnavailable }
             </div>
 
             <div className="mb-4">
-              <label className="block mb-2">Rs. 1.50 Paid? *</label>
+              <label className="block mb-2">Rs. 50 Paid? *</label>
               <div className="flex gap-4">
                 <label className="flex items-center">
                   <input

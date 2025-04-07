@@ -6,7 +6,7 @@ const SETTERS = [
   'Vikneswar',
   'Hemaanth',
   'Harneesh',
-  'Hitesh',
+  'Krishna',
   'Kumaran',
   'Sethu',
   'Prasanna'

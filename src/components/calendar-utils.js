@@ -5,7 +5,7 @@ export const SETTERS = [
   'Vikneswar',
   'Hemaanth',
   'Harneesh',
-  'Hitesh',
+  'Krishna',
   'Kumaran',
   'Sethu',
   'Prasanna',
@@ -305,7 +305,7 @@ export const calculateSalesPersonStats = (appointments, salesPerson, selectedDat
   };
 };
 
-export const calculateStats = (appointments, salesPeople, selectedDate, unavailableSlots) => {
+export const calculateStats = (appointments, salesPeople, selectedDate, userUnavailableSlots, defaultUnavailableSlots = {}) => {
   const todayAppointments = appointments.filter(
     app => app.date.toDateString() === selectedDate.toDateString()
   );
@@ -314,13 +314,42 @@ export const calculateStats = (appointments, salesPeople, selectedDate, unavaila
     app => app.status !== 'rescheduled'
   );
 
+  // Calculate total slots for each person, excluding breaks
   const totalSlots = salesPeople.reduce((acc, person) => {
     if (!person.isPresent) return acc;
-    const slots = countSlotsBetweenTimes(person.startTime, person.endTime);
-    return acc + slots;
+    
+    // Count available slots between start and end time
+    const timeSlots = createTimeSlots().filter(time => 
+      time >= person.startTime && time < person.endTime
+    );
+
+    // Remove global break slots
+    const availableSlots = timeSlots.filter(time => {
+      const isBreakTime = Object.entries(defaultUnavailableSlots)
+        .some(([key, slot]) => {
+          const timeFromKey = key.split('_')[1];
+          return slot.isGlobal && timeFromKey === time;
+        });
+      return !isBreakTime;
+    });
+
+    // Remove personal unavailable slots
+    const finalSlots = availableSlots.filter(time => {
+      const isPersonalUnavailable = Object.entries(defaultUnavailableSlots)
+        .some(([key, slot]) => {
+          const [, name, timeFromKey] = key.split('_');
+          return !slot.isGlobal && 
+                 name.toLowerCase() === person.name.toLowerCase() && 
+                 timeFromKey === time;
+        });
+      return !isPersonalUnavailable;
+    });
+
+    return acc + finalSlots.length;
   }, 0);
 
-  const unavailableCount = Object.entries(unavailableSlots).reduce((count, [key, isUnavailable]) => {
+  // Count user-set unavailable slots
+  const unavailableCount = Object.entries(userUnavailableSlots).reduce((count, [key, isUnavailable]) => {
     if (isUnavailable && key.includes(selectedDate.toDateString())) {
       count++;
     }

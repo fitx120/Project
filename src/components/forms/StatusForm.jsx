@@ -22,7 +22,7 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
     const updates = {
       status,
       callLaterDateTime: status === 'call_later' ? callLaterDateTime : null,
-      callNotes: ['5k_pitched', '20k_pitched'].includes(status) ? callNotes : null,
+      callNotes: ['5k_pitched', '20k_pitched', 'wrongly_qualified'].includes(status) ? callNotes : null,
       paymentType: status === 'paid' ? paymentType : null,
       pitchedType: ['5k_pitched', '20k_pitched'].includes(status) ? status :
                    status === 'paid' ? pitchedType : null
@@ -163,7 +163,7 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
               </div>
             )}
 
-            {['5k_pitched', '20k_pitched'].includes(status) && (
+            {(['5k_pitched', '20k_pitched', 'wrongly_qualified'].includes(status)) && (
               <div className="mb-4">
                 <label className="block mb-2">Call Notes</label>
                 <textarea
@@ -171,7 +171,9 @@ const StatusForm = ({ appointment, onClose, onUpdateStatus, onReschedule, salesP
                   value={callNotes}
                   onChange={e => setCallNotes(e.target.value)}
                   required
-                  placeholder="Enter feedback about the call..."
+                  placeholder={status === 'wrongly_qualified' 
+                    ? "Please enter the reason for wrong qualification..."
+                    : "Enter feedback about the call..."}
                   rows={4}
                 />
               </div>
