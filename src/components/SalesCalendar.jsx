@@ -6,7 +6,10 @@ import {
   saveAttendanceStatus,
   subscribeToAttendance,
   subscribeToUnavailableSlots,
-  loadAttendanceStatus 
+  loadAttendanceStatus,
+  saveUserUnavailableSlots,
+  loadUserUnavailableSlots,
+  subscribeToUserUnavailableSlots
 } from '../firebase';
 import { formatTime, createTimeSlots, calculateStats, getStatusDisplay, getStatusColor } from './calendar-utils';
 import { validateCalculations } from './test-calculations';
@@ -171,11 +174,23 @@ const SalesCalendar = () => {
     }
   };
 
-  // Subscribe to default unavailable slots
+  // Subscribe to default and user unavailable slots
   useEffect(() => {
-    const unsubscribe = subscribeToUnavailableSlots(setDefaultUnavailableSlots);
-    return () => unsubscribe();
-  }, []);
+    const unsubscribe1 = subscribeToUnavailableSlots(setDefaultUnavailableSlots);
+    const unsubscribe2 = subscribeToUserUnavailableSlots((slots) => {
+      setUserUnavailableSlots(slots);
+    }, selectedDate);
+
+    // Load initial user unavailable slots
+    loadUserUnavailableSlots(selectedDate).then(slots => {
+      setUserUnavailableSlots(slots);
+    });
+
+    return () => {
+      unsubscribe1();
+      unsubscribe2();
+    };
+  }, [selectedDate]);
 
   const isSlotUnavailable = useCallback((person, time) => {
     // Check global default slots
@@ -239,12 +254,25 @@ const SalesCalendar = () => {
     setShowBookingForm(true);
   };
 
-  const toggleUnavailable = (person, time) => {
+  const toggleUnavailable = async (person, time) => {
     const slotKey = `${person.name}-${time}-${selectedDate.toDateString()}`;
-    setUserUnavailableSlots(prev => ({
-      ...prev,
-      [slotKey]: !prev[slotKey]
-    }));
+    const newStatus = !userUnavailableSlots[slotKey];
+    const updatedSlots = {
+      ...userUnavailableSlots,
+      [slotKey]: newStatus
+    };
+    
+    console.log(`🕒 Toggling slot: ${slotKey}`);
+    console.log(`📍 New status: ${newStatus ? 'Unavailable' : 'Available'}`);
+    
+    try {
+      await saveUserUnavailableSlots(updatedSlots, selectedDate);
+      console.log('✅ Successfully saved to Firebase');
+      setUserUnavailableSlots(updatedSlots);
+    } catch (error) {
+      console.error('❌ Error saving unavailable slot:', error);
+      alert('Failed to update slot availability. Please try again.');
+    }
   };
 
   const stats = useMemo(() => calculateStats(appointments, salesPeople, selectedDate, userUnavailableSlots, defaultUnavailableSlots), 

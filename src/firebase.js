@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, set, get, onValue, remove } from 'firebase/database';
+import { getDatabase, ref, set, get, onValue, remove, update } from 'firebase/database';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -133,6 +133,26 @@ export const subscribeToAttendance = (callback, date) => {
   }
 };
 
+export const subscribeToUnavailableSlots = (callback) => {
+  try {
+    console.log(`[${import.meta.env.MODE}] Setting up unavailable slots subscription...`);
+    const slotsRef = ref(database, 'unavailableSlots');
+    return onValue(slotsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const slots = snapshot.val();
+        console.log(`[${import.meta.env.MODE}] Unavailable slots updated`);
+        callback(slots);
+      } else {
+        callback({});
+      }
+    });
+  } catch (error) {
+    console.error(`[${import.meta.env.MODE}] Error in unavailable slots subscription:`, error);
+    callback({});
+    return () => {};
+  }
+};
+
 export const loadAttendanceStatus = async (date) => {
   try {
     console.log(`[${import.meta.env.MODE}] Loading attendance status for date:`, date);
@@ -151,5 +171,111 @@ export const loadAttendanceStatus = async (date) => {
     return null;
   }
 };
+
+// Default unavailable slots configuration
+const DEFAULT_UNAVAILABLE_SLOTS = {
+  "default_13:00": { 
+    type: "break",
+    label: "Lunch Break",
+    isDefault: true,
+    isGlobal: true
+  },
+  "default_16:00": {
+    type: "break", 
+    label: "Tea Break",
+    isDefault: true,
+    isGlobal: true
+  },
+  "default_monish_20:30": {
+    type: "personal",
+    label: "Unavailable",
+    isDefault: true,
+    isGlobal: false,
+    person: "Monish"
+  }
+};
+
+// Initialize default unavailable slots
+export const initializeDefaultSlots = async () => {
+  try {
+    const slotsRef = ref(database, 'unavailableSlots');
+    const snapshot = await get(slotsRef);
+    const existingSlots = snapshot.val() || {};
+    
+    // Only add default slots if they don't exist
+    const updates = {};
+    Object.entries(DEFAULT_UNAVAILABLE_SLOTS).forEach(([key, value]) => {
+      if (!existingSlots[key]) {
+        updates[key] = value;
+      }
+    });
+
+    if (Object.keys(updates).length > 0) {
+      await update(ref(database, 'unavailableSlots'), updates);
+      console.log('Default unavailable slots initialized');
+    }
+  } catch (error) {
+    console.error('Error initializing default slots:', error);
+  }
+};
+
+// Save user-set unavailable slots
+export const saveUserUnavailableSlots = async (slots, date) => {
+  try {
+    console.log(`[${import.meta.env.MODE}] Saving user unavailable slots for date:`, date);
+    const dateKey = date.toISOString().split('T')[0];
+    const slotsRef = ref(database, `userUnavailableSlots/${dateKey}`);
+    await set(slotsRef, slots);
+    console.log(`[${import.meta.env.MODE}] User unavailable slots saved successfully`);
+    return true;
+  } catch (error) {
+    console.error(`[${import.meta.env.MODE}] Error saving user unavailable slots:`, error);
+    throw error;
+  }
+};
+
+// Load user-set unavailable slots
+export const loadUserUnavailableSlots = async (date) => {
+  try {
+    console.log(`[${import.meta.env.MODE}] Loading user unavailable slots for date:`, date);
+    const dateKey = date.toISOString().split('T')[0];
+    const slotsRef = ref(database, `userUnavailableSlots/${dateKey}`);
+    const snapshot = await get(slotsRef);
+    if (snapshot.exists()) {
+      console.log(`[${import.meta.env.MODE}] User unavailable slots loaded`);
+      return snapshot.val();
+    }
+    console.log(`[${import.meta.env.MODE}] No user unavailable slots found`);
+    return {};
+  } catch (error) {
+    console.error(`[${import.meta.env.MODE}] Error loading user unavailable slots:`, error);
+    return {};
+  }
+};
+
+// Subscribe to user unavailable slots
+export const subscribeToUserUnavailableSlots = (callback, date) => {
+  try {
+    console.log(`[${import.meta.env.MODE}] Setting up user unavailable slots subscription...`);
+    const dateKey = date.toISOString().split('T')[0];
+    const slotsRef = ref(database, `userUnavailableSlots/${dateKey}`);
+    return onValue(slotsRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const slots = snapshot.val();
+        console.log(`[${import.meta.env.MODE}] User unavailable slots updated`);
+        callback(slots);
+      } else {
+        callback({});
+      }
+    });
+  } catch (error) {
+    console.error(`[${import.meta.env.MODE}] Error in user unavailable slots subscription:`, error);
+    callback({});
+    return () => {};
+  }
+};
+
+// Run initialization
+initializeDefaultSlots();
 
 export default database;
