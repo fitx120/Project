@@ -55,7 +55,7 @@ const AppointmentTooltip = ({ appointment, position }) => (
         {getStatusDisplay(appointment.initialPitchType)}
       </p>
       <p className="text-sm">
-        <span className="font-medium">Rs. 1.50:</span>{' '}
+        <span className="font-medium">Rs.50 Paid:</span>{' '}
         <span className={appointment.initialPayment === 'paid' ? 'text-green-600' : 'text-red-600'}>
           {appointment.initialPayment === 'paid' ? 'Paid' : 'Not Paid'}
         </span>
@@ -63,6 +63,19 @@ const AppointmentTooltip = ({ appointment, position }) => (
       <p className="text-sm">
         <span className="font-medium">Lead Source:</span>{' '}
         <span className="capitalize">{appointment.leadSource || 'Ads'}</span>
+      </p>
+      <p className="text-sm">
+        <span className="font-medium">Lead Quality:</span>{' '}
+        <span className={
+          appointment.leadQuality === 'best' ? 'text-green-600 font-medium' :
+          appointment.leadQuality === 'good' ? 'text-orange-500 font-medium' :
+          'text-yellow-500 font-medium'
+        }>
+          {appointment.leadQuality ? 
+            appointment.leadQuality.charAt(0).toUpperCase() + 
+            appointment.leadQuality.slice(1) : 
+            'Average'}
+        </span>
       </p>
     </div>
 
@@ -148,6 +161,7 @@ AppointmentTooltip.propTypes = {
     initialPitchType: PropTypes.string.isRequired,
     initialPayment: PropTypes.string.isRequired,
     leadSource: PropTypes.string,
+    leadQuality: PropTypes.string,
     callLaterDateTime: PropTypes.string,
     callNotes: PropTypes.string,
     paymentType: PropTypes.string,
