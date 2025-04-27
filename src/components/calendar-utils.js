@@ -6,7 +6,7 @@ export const SETTERS = [
   'Hemaanth',
   'Harneesh',
   'Krishna',
-  'Kumaran',
+  'Raju',
   'Sethu',
   'Prasanna',
   'Sales Person'
@@ -19,8 +19,8 @@ export const getStatusDisplay = (status) => {
     'call_later': 'Call Later',
     'will_join_later': 'Will Join Later',
     'ghosted': 'Ghosted',
-    '5k_pitched': '10K Pitched',  // Display updated, keeping code same for DB compatibility
-    '20k_pitched': '20K Pitched',
+    '5k_pitched': '10K Pitch',  // Display updated, keeping code same for DB compatibility
+    '20k_pitched': '20K Pitch',
     'booked': 'Booked',
     'rescheduled': 'Rescheduled',
     'wrongly_qualified': 'Wrongly Qualified',
