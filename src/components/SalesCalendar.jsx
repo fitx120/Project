@@ -18,6 +18,7 @@ import StatusForm from './forms/StatusForm';
 import AppointmentTooltip from './AppointmentTooltip';
 import SetterPerformance from './SetterPerformance';
 import LeadSourcePerformance from './LeadSourcePerformance';
+import LeadQualityPerformance from './LeadQualityPerformance';
 import SalesPersonPerformance from './SalesPersonPerformance';
 
 const DEFAULT_SALES_PEOPLE = [
@@ -558,6 +559,11 @@ const SalesCalendar = () => {
       {/* Lead Source Performance */}
       <div className="bg-gray-50 p-4 rounded-lg mt-6">
         <LeadSourcePerformance leadSourceStats={stats.leadSourceStats} />
+      </div>
+
+      {/* Lead Quality Performance */}
+      <div className="bg-gray-50 p-4 rounded-lg mt-6">
+        <LeadQualityPerformance appointments={todayAppointments} />
       </div>
 
       {/* Forms */}
